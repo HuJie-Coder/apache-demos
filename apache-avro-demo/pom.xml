@@ -12,10 +12,6 @@
 
     <artifactId>apache-avro-demo</artifactId>
 
-    <properties>
-
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.avro</groupId>

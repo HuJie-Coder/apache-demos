@@ -8,6 +8,7 @@
     <artifactId>apache-demo</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
     <modules>
         <module>apache-avro-demo</module>
         <module>apache-parquet-demo</module>
