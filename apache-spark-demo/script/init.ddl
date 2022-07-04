@@ -1,4 +1,8 @@
-CREATE TABLE IF NOT EXISTS src.babies_daily
+CREATE DATABASE IF NOT EXISTS ods
+    COMMENT "ODS层数据库"
+    WITH DBPROPERTIES ("layer" = "ods","creater" = "jayden")
+;
+CREATE TABLE IF NOT EXISTS ods.babies_daily
 (
     user_id    STRING,
     auction_id STRING,
@@ -8,4 +12,7 @@ CREATE TABLE IF NOT EXISTS src.babies_daily
     buy_mount  STRING,
     day        STRING
 )
-    USING PARQUET;
+    USING PARQUET
+    COMMENT "淘宝母婴购物数据集"
+    TBLPROPERTIES ("layer" = "ods","creater" = "jayden")
+;

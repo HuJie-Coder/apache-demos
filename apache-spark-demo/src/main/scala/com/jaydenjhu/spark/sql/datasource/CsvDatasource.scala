@@ -1,5 +1,6 @@
 package com.jaydenjhu.spark.sql.datasource
 
+import com.jaydenjhu.spark.PATH_DELIMITER
 import org.apache.spark.sql.SaveMode
 
 object CsvDatasource {
