@@ -12,6 +12,9 @@ import java.util.List;
 public class Application {
 
     public static void main(String[] args) {
+        /*
+        * OnOutOfMemoryError 验证测试
+        * */
         List<Object> list = new ArrayList<>(10000);
         while (true){
             list.add(new Object());

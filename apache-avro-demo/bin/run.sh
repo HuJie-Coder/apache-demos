@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Usage: bash run.sh start|stop
+# Usage: bash run.sh start|stop|status
 MAIN_CLASS="com.jaydenjhu.custom.Application"
-JAVA_ARGS=""
 HEAP_MAX_MEMORY="${HEAP_MAX_MEMORY-1m}"
 HEAP_INIT_MEMORY="${HEAP_MAX_MEMORY}"
 OPERATION=${1-start}
-WEDATA_PROFILES_ACTIVE=${WEDATA_PROFILES_ACTIVE}
+WEDATA_PROFILES_ACTIVE=${WEDATA_PROFILES_ACTIVE-prod}
+JAVA_ARGS="--spring.profiles.active=${WEDATA_PROFILES_ACTIVE}"
 
 function log_debug(){
   if [[ $LOG_LEVEL_NUM -ge 3 ]];then
@@ -80,24 +80,29 @@ function generate_application_properties(){
 
   CLASS_PATH=${CLASS_PATH:1}
   JVM_PROPERTIES="
-                -Xms${HEAP_INIT_MEMORY}
-                -Xmx${HEAP_MAX_MEMORY}
-                -Xloggc:${LOG_PATH}/gc.log
-                -server
-                -XX:+UseParallelGC
-                -XX:+PrintGC
-                -XX:+PrintGCDetails
-                -XX:+HeapDumpOnOutOfMemoryError
-                -XX:OnOutOfMemoryError=\"echo test\"
-                -XX:ErrorFile=${LOG_PATH}/java_error.log
-                -XX:HeapDumpPath=${LOG_PATH}/dump.hprof
-                -Dfile.encoding=utf-8"
-  SPRING_PROPERTIES="--spring.profiles.active=${WEDATA_PROFILES_ACTIVE}"
+                "
+  SPRING_PROPERTIES=""
 }
 
 function start_application(){
-  log_info "application env is ${WEDATA_PROFILES_ACTIVE}"
-  JAVA_COMMAND="java ${JVM_PROPERTIES} -cp ${CLASS_PATH} ${MAIN_CLASS} ${SPRING_PROPERTIES} ${JAVA_ARGS}"
+  log_info "classpath:${CLASS_PATH}"
+  log_info "main class:${MAIN_CLASS}"
+  log_info "java args: ${JAVA_ARGS}"
+  java -Xms${HEAP_INIT_MEMORY} \
+       -Xmx${HEAP_MAX_MEMORY} \
+       -Xloggc:${LOG_PATH}/gc.log \
+       -server \
+       -XX:+UseParallelGC \
+       -XX:+PrintGC \
+       -XX:+PrintGCDetails \
+       -XX:+HeapDumpOnOutOfMemoryError \
+       -XX:OnOutOfMemoryError="kill %p" \
+       -XX:ErrorFile=${LOG_PATH}/java_error.log \
+       -XX:HeapDumpPath=${LOG_PATH}/dump.hprof \
+       -Dfile.encoding=utf-8 \
+       -cp ${CLASS_PATH} \
+       ${MAIN_CLASS} \
+       ${JAVA_ARGS}
   log_info "${JAVA_COMMAND}"
   cd ${CURRENT_PATH}
   ${JAVA_COMMAND} 2>${LOG_PATH}/error.log &
