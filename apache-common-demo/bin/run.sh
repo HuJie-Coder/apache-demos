@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: bash run.sh start|stop|status
+# Usage: bin/run.sh start|stop|status
 MAIN_CLASS="com.jaydenjhu.custom.Application"
 HEAP_MAX_MEMORY="${HEAP_MAX_MEMORY-1m}"
 HEAP_INIT_MEMORY="${HEAP_MAX_MEMORY}"
@@ -53,14 +53,13 @@ function init_env(){
   generate_log_level
   generate_application_properties
 
-  log_info "CURRENT_DIR: ${CURRENT_PATH}"
-  log_info "LIB_PATH: ${LIB_PATH}"
-  log_info "BIN_PATH: ${BIN_PATH}"
-  log_info "LOG_PATH: ${LOG_PATH}"
-  log_info "CONF_PATH: ${CONF_PATH}"
-  log_info "DATA_PATH: ${DATA_PATH}"
+  log_debug "CURRENT_DIR: ${CURRENT_PATH}"
+  log_debug "LIB_PATH: ${LIB_PATH}"
+  log_debug "BIN_PATH: ${BIN_PATH}"
+  log_debug "LOG_PATH: ${LOG_PATH}"
+  log_debug "CONF_PATH: ${CONF_PATH}"
+  log_debug "DATA_PATH: ${DATA_PATH}"
   log_debug "CLASSPATH: ${CLASS_PATH}"
-  log_debug "APPLICATION_PROPERTIES:${APPLICATION_PROPERTIES}"
 
   if [[ ! -d ${LOG_PATH}  ]];then
     mkdir -p ${LOG_PATH}
@@ -76,6 +75,7 @@ function generate_application_properties(){
     log_debug "add jar: ${jarfile}"
     CLASS_PATH="${CLASS_PATH}:${jarfile}"
   done
+
 
   CLASS_PATH=${CLASS_PATH:1}
 }
@@ -95,14 +95,14 @@ function start_application(){
        -XX:+HeapDumpOnOutOfMemoryError \
        -XX:OnOutOfMemoryError="kill %p" \
        -XX:ErrorFile=${LOG_PATH}/java_error_%p.log \
-       -XX:HeapDumpPath=${LOG_PATH}/dump.hprof \
+       -XX:HeapDumpPath=${LOG_PATH} \
        -Dfile.encoding=utf-8 \
        -cp ${CLASS_PATH} \
        ${MAIN_CLASS} \
        ${JAVA_ARGS} 2>${LOG_PATH}/error.log &
   APPLICATION_PID=${!}
   echo "${APPLICATION_PID}" > ${PID_FILE}
-  log_info "application pid:${APPLICATION_PID}"
+  log_info "pid:${APPLICATION_PID}"
 }
 
 function stop_application() {
@@ -152,6 +152,9 @@ function main() {
 }
 
 export LANG=zh_CN.UTF-8
-CURRENT_PATH=$(dirname $(dirname $0))
+CURRENT_PATH=$(pwd $(dirname $(dirname $0)))
+if [[ "${CURRENT_PATH##*/}" = "bin" ]];then
+  CURRENT_PATH=$(dirname ${CURRENT_PATH})
+fi
 LOG_LEVEL="info"
 main
