@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: bin/run.sh start|restart|stop|status
+# Usage: run.sh start|restart|stop|status
 # Creator: Jayden
 MAIN_CLASS="com.jaydenjhu.custom.Application"
 HEAP_MAX_MEMORY="${HEAP_MAX_MEMORY-1m}"
@@ -8,7 +8,7 @@ HEAP_INIT_MEMORY="${HEAP_MAX_MEMORY}"
 OPERATION=${1-start}
 SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE-prod}
 JAVA_ARGS="--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"
-IS_DOCKER=${IS_DOCKER-false}
+IS_DOCKER=${IS_DOCKER}
 
 function log_debug(){
   if [[ $LOG_LEVEL_NUM -ge 4 ]];then
@@ -118,7 +118,7 @@ function start_application(){
        ${JAVA_ARGS} 2>${LOG_PATH}/error.log &
   APPLICATION_PID=${!}
   echo "${APPLICATION_PID}" > ${PID_FILE}
-  log_info "pid:${APPLICATION_PID}"
+  log_info "start success, pid:${APPLICATION_PID}"
 }
 
 # exit if application is alive
@@ -174,7 +174,7 @@ function main() {
     "start")
         start_application
         # 如果是 docker 的启动脚本，当容器关闭时，调用 stop_application 优雅关闭服务
-        if [[ ${IS_DOCKER} = "true" ]];then 
+        if [[ ${IS_DOCKER} = "true" ]];then
           trap stop_application EXIT
           tail -f /dev/null
         fi 
