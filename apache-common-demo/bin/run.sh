@@ -77,35 +77,29 @@ function generate_application_properties(){
     CLASS_PATH="${CLASS_PATH}:${jarfile}"
   done
 
-
   CLASS_PATH=${CLASS_PATH:1}
-  JVM_PROPERTIES="
-                "
-  SPRING_PROPERTIES=""
 }
 
 function start_application(){
   log_info "classpath:${CLASS_PATH}"
   log_info "main class:${MAIN_CLASS}"
   log_info "java args: ${JAVA_ARGS}"
+  cd ${CURRENT_PATH}
   java -Xms${HEAP_INIT_MEMORY} \
        -Xmx${HEAP_MAX_MEMORY} \
-       -Xloggc:${LOG_PATH}/gc.log \
+       -Xloggc:${LOG_PATH}/gc-%t.log \
        -server \
        -XX:+UseParallelGC \
        -XX:+PrintGC \
        -XX:+PrintGCDetails \
        -XX:+HeapDumpOnOutOfMemoryError \
        -XX:OnOutOfMemoryError="kill %p" \
-       -XX:ErrorFile=${LOG_PATH}/java_error.log \
+       -XX:ErrorFile=${LOG_PATH}/java_error_%p.log \
        -XX:HeapDumpPath=${LOG_PATH}/dump.hprof \
        -Dfile.encoding=utf-8 \
        -cp ${CLASS_PATH} \
        ${MAIN_CLASS} \
-       ${JAVA_ARGS}
-  log_info "${JAVA_COMMAND}"
-  cd ${CURRENT_PATH}
-  ${JAVA_COMMAND} 2>${LOG_PATH}/error.log &
+       ${JAVA_ARGS} 2>${LOG_PATH}/error.log &
   APPLICATION_PID=${!}
   echo "${APPLICATION_PID}" > ${PID_FILE}
   log_info "application pid:${APPLICATION_PID}"
