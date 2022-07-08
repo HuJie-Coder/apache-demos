@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Usage: bin/run.sh start|restart|stop|status
+# Creator: Jayden
 MAIN_CLASS="com.jaydenjhu.custom.Application"
 HEAP_MAX_MEMORY="${HEAP_MAX_MEMORY-1m}"
 HEAP_INIT_MEMORY="${HEAP_MAX_MEMORY}"
@@ -73,6 +74,12 @@ function init_env(){
 
   if [[ ! -d ${LOG_PATH}  ]];then
     mkdir -p ${LOG_PATH}
+  fi
+  if [[ ! -d ${CONF_PATH}  ]];then
+    mkdir -p ${CONF_PATH}
+  fi
+  if [[ ! -d ${LIB_PATH}  ]];then
+    mkdir -p ${LIB_PATH}
   fi
 }
 
