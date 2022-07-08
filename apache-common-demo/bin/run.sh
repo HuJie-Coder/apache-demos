@@ -10,8 +10,14 @@ JAVA_ARGS="--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"
 IS_DOCKER=${IS_DOCKER-false}
 
 function log_debug(){
-  if [[ $LOG_LEVEL_NUM -ge 3 ]];then
+  if [[ $LOG_LEVEL_NUM -ge 4 ]];then
     echo "$(date '+%Y-%m-%d %H:%M:%S') [DEBUG] ${*}"
+  fi
+}
+
+function log_warn(){
+  if [[ $LOG_LEVEL_NUM -ge 3 ]];then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [WARN] ${*}"
   fi
 }
 
@@ -30,6 +36,9 @@ function log_error(){
 function generate_log_level(){
   case "${LOG_LEVEL}" in
     "debug")
+        LOG_LEVEL_NUM=4
+      ;;
+    "warn")
         LOG_LEVEL_NUM=3
       ;;
     "info")
@@ -105,11 +114,12 @@ function start_application(){
   log_info "pid:${APPLICATION_PID}"
 }
 
+# exit if application is alive
 function check_application_is_running() {
   if [[ -f ${PID_FILE} ]];then
       APPLICATION_PID=`cat ${PID_FILE}`
       if [[ ! -z ${APPLICATION_PID} ]]; then
-        local pid_exists=`ps -ef | awk '{print $2}' | grep ${APPLICATION_PID}`
+        local pid_exists=$(ps -ef | awk '{print $2}' | grep ${APPLICATION_PID})
         if [[ ! -z ${pid_exists} ]];then
           log_error "application (PID=${APPLICATION_PID}) is already running"
           exit 0
@@ -121,9 +131,9 @@ function check_application_is_running() {
 function stop_application() {
   APPLICATION_PID=`cat ${PID_FILE}`
   if [[ ! -z ${APPLICATION_PID} ]]; then
-    local pid_exists=`ps -ef | awk '{print $2}' | grep ${APPLICATION_PID}`
+    local pid_exists=$(ps -ef | awk '{print $2}' | grep ${APPLICATION_PID})
     if [[ -z ${pid_exists} ]];then
-      log_info "application(PID=${APPLICATION_PID}) is stopped"
+      log_warn "application(PID=${APPLICATION_PID}) is stopped"
     else
       log_info "start stop application(PID=${APPLICATION_PID})"
       kill ${APPLICATION_PID}
@@ -131,8 +141,7 @@ function stop_application() {
       log_info "stop success"
     fi
   else
-    log_error "pid is blank,please check manually"
-    exit 0
+    log_warn "can't find pid file,please type 'ps -ef | grep java' to find the pid and kill it"
   fi
 }
 
@@ -142,13 +151,13 @@ function status_application(){
       local pid_exists=`ps -ef | awk '{print $2}' | grep ${APPLICATION_PID}`
       if [[ -z ${pid_exists} ]];then
         log_error "pid: ${APPLICATION_PID} doesn't exists"
-        log_info "status: [Inactive]"
+        log_warn "status: [Inactive]"
       else
         log_info "pid: ${APPLICATION_PID}"
         log_info "status: [Active]"
       fi
     else
-      log_error "pid is blank,please check manually!"
+      log_warn "pid is blank,please check manually!"
     fi
 }
 
