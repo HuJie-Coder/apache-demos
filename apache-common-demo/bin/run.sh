@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# Usage: bin/run.sh start|stop|status
+# Usage: bin/run.sh start|restart|stop|status
 MAIN_CLASS="com.jaydenjhu.custom.Application"
 HEAP_MAX_MEMORY="${HEAP_MAX_MEMORY-1m}"
 HEAP_INIT_MEMORY="${HEAP_MAX_MEMORY}"
 OPERATION=${1-start}
-WEDATA_PROFILES_ACTIVE=${WEDATA_PROFILES_ACTIVE-prod}
-JAVA_ARGS="--spring.profiles.active=${WEDATA_PROFILES_ACTIVE}"
+SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE-prod}
+JAVA_ARGS="--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"
+IS_DOCKER=${IS_DOCKER-false}
 
 function log_debug(){
   if [[ $LOG_LEVEL_NUM -ge 3 ]];then
@@ -75,12 +76,11 @@ function generate_application_properties(){
     log_debug "add jar: ${jarfile}"
     CLASS_PATH="${CLASS_PATH}:${jarfile}"
   done
-
-
   CLASS_PATH=${CLASS_PATH:1}
 }
 
 function start_application(){
+  check_application_is_running
   log_info "classpath:${CLASS_PATH}"
   log_info "main class:${MAIN_CLASS}"
   log_info "java args: ${JAVA_ARGS}"
@@ -105,19 +105,34 @@ function start_application(){
   log_info "pid:${APPLICATION_PID}"
 }
 
+function check_application_is_running() {
+  if [[ -f ${PID_FILE} ]];then
+      APPLICATION_PID=`cat ${PID_FILE}`
+      if [[ ! -z ${APPLICATION_PID} ]]; then
+        local pid_exists=`ps -ef | awk '{print $2}' | grep ${APPLICATION_PID}`
+        if [[ ! -z ${pid_exists} ]];then
+          log_error "application (PID=${APPLICATION_PID}) is already running"
+          exit 0
+        fi
+      fi
+  fi
+}
+
 function stop_application() {
   APPLICATION_PID=`cat ${PID_FILE}`
   if [[ ! -z ${APPLICATION_PID} ]]; then
     local pid_exists=`ps -ef | awk '{print $2}' | grep ${APPLICATION_PID}`
     if [[ -z ${pid_exists} ]];then
-      log_error "pid: ${APPLICATION_PID} doesn't exists,please check manually!"
+      log_info "application(PID=${APPLICATION_PID}) is stopped"
     else
-      log_info "start stop application..."
+      log_info "start stop application(PID=${APPLICATION_PID})"
       kill ${APPLICATION_PID}
-      log_info "application has been stopped!"
+      wait ${APPLICATION_PID}
+      log_info "stop success"
     fi
   else
-    log_error "pid is blank,please check manually!"
+    log_error "pid is blank,please check manually"
+    exit 0
   fi
 }
 
@@ -142,9 +157,18 @@ function main() {
     case ${OPERATION} in
     "start")
         start_application
+        # 如果是 docker 的启动脚本，当容器关闭时，调用 stop_application 优雅关闭服务
+        if [[ ${IS_DOCKER} = "true" ]];then 
+          trap stop_application EXIT
+          tail -f /dev/null
+        fi 
       ;;
     "stop")
         stop_application
+      ;;
+    "restart")
+        stop_application
+        start_application
       ;;
     "status")
         status_application
