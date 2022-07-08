@@ -97,6 +97,10 @@ function generate_application_properties(){
 
 function start_application(){
   check_application_is_running
+  local application_is_running=${?}
+  if [[ ${application_is_running} == 1 ]];then
+    log_error "application(PID=$(cat ${PID_FILE})) is already running"
+  fi
   log_info "classpath:${CLASS_PATH}"
   log_info "main class:${MAIN_CLASS}"
   log_info "java args: ${JAVA_ARGS}"
@@ -121,17 +125,19 @@ function start_application(){
   log_info "start success, pid:${APPLICATION_PID}"
 }
 
-# exit if application is alive
+# return 1 if application is alive else 0
 function check_application_is_running() {
   if [[ -f ${PID_FILE} ]];then
       APPLICATION_PID=`cat ${PID_FILE}`
       if [[ ! -z ${APPLICATION_PID} ]]; then
         local pid_exists=$(ps -ef | awk '{print $2}' | grep ${APPLICATION_PID})
         if [[ ! -z ${pid_exists} ]];then
-          log_error "application (PID=${APPLICATION_PID}) is already running"
-          exit 0
+          return 1
+        else return 0
         fi
+      else return 0
       fi
+    else return 0
   fi
 }
 
@@ -192,7 +198,7 @@ function main() {
 }
 
 export LANG=zh_CN.UTF-8
-CURRENT_PATH=$(pwd $(dirname $(dirname $0)))
+CURRENT_PATH=$(pwd "$(dirname "$(dirname $0)")")
 if [[ "${CURRENT_PATH##*/}" = "bin" ]];then
   CURRENT_PATH=$(dirname ${CURRENT_PATH})
 fi
