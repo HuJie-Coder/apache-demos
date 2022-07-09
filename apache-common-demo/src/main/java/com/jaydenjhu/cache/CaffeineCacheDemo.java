@@ -20,7 +20,6 @@ public class CaffeineCacheDemo {
                 System.out.println(String.format("%s was removed caused by %s", key, cause));
             })
             .build();
-
     public static void main(String[] args) {
         try {
             Thread.sleep(10000L);
