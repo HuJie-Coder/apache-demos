@@ -85,7 +85,7 @@ function init_env(){
 
 function generate_application_properties(){
   # add jars to classpath
-  jars=`ls ${LIB_PATH}`
+  jars=$(cat "${PID_FILE}")
   for jarfile in ${jars}
   do
     jarfile=${LIB_PATH}/${jarfile}
@@ -128,7 +128,7 @@ function start_application(){
 # return 1 if application is alive else 0
 function check_application_is_running() {
   if [[ -f ${PID_FILE} ]];then
-      APPLICATION_PID=$(cat ${PID_FILE})
+      APPLICATION_PID=$(cat "${PID_FILE}")
       if [[ ! -z ${APPLICATION_PID} ]]; then
         local pid_exists=$(ps -ef | awk '{print $2}' | grep ${APPLICATION_PID})
         if [[ ! -z ${pid_exists} ]];then
@@ -161,7 +161,7 @@ function stop_application() {
 function status_application(){
     APPLICATION_PID=$(cat ${PID_FILE})
     if [[ ! -z ${APPLICATION_PID} ]]; then
-      local pid_exists=`ps -ef | awk '{print $2}' | grep ${APPLICATION_PID}`
+      local pid_exists=$(ps -ef | awk '{print $2}' | grep ${APPLICATION_PID})
       if [[ -z ${pid_exists} ]];then
         log_error "pid: ${APPLICATION_PID} doesn't exists"
         log_warn "status: [Inactive]"
