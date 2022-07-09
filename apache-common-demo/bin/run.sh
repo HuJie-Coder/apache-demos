@@ -104,7 +104,7 @@ function start_application(){
   log_info "classpath:${CLASS_PATH}"
   log_info "main class:${MAIN_CLASS}"
   log_info "java args: ${JAVA_ARGS}"
-  cd ${CURRENT_PATH}
+  cd ${CURRENT_PATH} || exit
   java -Xms${HEAP_INIT_MEMORY} \
        -Xmx${HEAP_MAX_MEMORY} \
        -Xloggc:${LOG_PATH}/gc-%t.log \
@@ -128,7 +128,7 @@ function start_application(){
 # return 1 if application is alive else 0
 function check_application_is_running() {
   if [[ -f ${PID_FILE} ]];then
-      APPLICATION_PID=`cat ${PID_FILE}`
+      APPLICATION_PID=$(cat ${PID_FILE})
       if [[ ! -z ${APPLICATION_PID} ]]; then
         local pid_exists=$(ps -ef | awk '{print $2}' | grep ${APPLICATION_PID})
         if [[ ! -z ${pid_exists} ]];then
@@ -142,7 +142,7 @@ function check_application_is_running() {
 }
 
 function stop_application() {
-  APPLICATION_PID=`cat ${PID_FILE}`
+  APPLICATION_PID=$(cat ${PID_FILE})
   if [[ ! -z ${APPLICATION_PID} ]]; then
     local pid_exists=$(ps -ef | awk '{print $2}' | grep ${APPLICATION_PID})
     if [[ -z ${pid_exists} ]];then
@@ -159,7 +159,7 @@ function stop_application() {
 }
 
 function status_application(){
-    APPLICATION_PID=`cat ${PID_FILE}`
+    APPLICATION_PID=$(cat ${PID_FILE})
     if [[ ! -z ${APPLICATION_PID} ]]; then
       local pid_exists=`ps -ef | awk '{print $2}' | grep ${APPLICATION_PID}`
       if [[ -z ${pid_exists} ]];then
