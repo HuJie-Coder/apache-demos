@@ -10,7 +10,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>apache-avro-demo</artifactId>
+    <artifactId>apache-common-demo</artifactId>
 
     <dependencies>
         <dependency>
