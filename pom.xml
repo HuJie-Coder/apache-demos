@@ -10,7 +10,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>apache-avro-demo</module>
+        <module>apache-common-demo</module>
         <module>apache-spark-demo</module>
     </modules>
 

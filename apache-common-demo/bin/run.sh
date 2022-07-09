@@ -148,7 +148,7 @@ function stop_application() {
     if [[ -z ${pid_exists} ]];then
       log_warn "application(PID=${APPLICATION_PID}) is stopped"
     else
-      log_info "start stop application(PID=${APPLICATION_PID})"
+      log_info "stop application(PID=${APPLICATION_PID})"
       kill ${APPLICATION_PID}
       wait ${APPLICATION_PID}
       log_info "stop success"
