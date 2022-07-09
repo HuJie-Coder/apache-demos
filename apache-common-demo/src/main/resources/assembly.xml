@@ -5,7 +5,7 @@
     <id>${project.archiveId}</id>
     <includeBaseDirectory>false</includeBaseDirectory>
     <formats>
-        <format>dir</format>
+        <format>zip</format>
     </formats>
     <fileSets>
         <fileSet>
